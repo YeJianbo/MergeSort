@@ -3,46 +3,46 @@
 using namespace std;
 
 
-const int BUFFER_SIZE = 200;//ç¼“å†²åŒºå¤§å°
-const int BLOCK_SIZE = 4;//å—å¤§å°
-const int MAX_BLOCK_NUM = 100;//æœ€å¤§å—æ•°
-const int MAX_DISK_SIZE = 400;//æœ€å¤§ç£ç›˜ç©ºé—´
+const int BUFFER_SIZE = 200;//»º³åÇø´óĞ¡
+const int BLOCK_SIZE = 4;//¿é´óĞ¡
+const int MAX_BLOCK_NUM = 100;//×î´ó¿éÊı
+const int MAX_DISK_SIZE = 400;//×î´ó´ÅÅÌ¿Õ¼ä
 const int GROUP_SIZE = 2;
 
 
-/* æµç¨‹
- * ä»ç£ç›˜ä¸­è¯»å–ä¸€ä¸ªå­é›†åˆï¼Œæ’åºåå¾—åˆ°é¡ºåºçš„å—ï¼Œä¾æ¬¡å°†å—è£…å…¥å†…å­˜ï¼Œå–ç¬¬ä¸€ä¸ªå…ƒç´ æ’åºï¼Œå½¢æˆä¸€ä¸ªå¾…æ¯”è¾ƒé›†åˆ
- * å°†å¾…æ¯”è¾ƒé›†åˆä¸­çš„æœ€å°å…ƒç´ æ”¾å…¥è¾“å‡ºå—ï¼Œå–æ‰€åœ¨å—çš„ä¸‹ä¸€ä¸ªå…ƒç´ æ”¾å…¥å¾…æ¯”è¾ƒé›†åˆï¼Œè¾“å‡ºå—æ»¡åè¾“å‡ºåˆ°ç£ç›˜ä¸­
+/* Á÷³Ì
+ * ´Ó´ÅÅÌÖĞ¶ÁÈ¡Ò»¸ö×Ó¼¯ºÏ£¬ÅÅĞòºóµÃµ½Ë³ĞòµÄ¿é£¬ÒÀ´Î½«¿é×°ÈëÄÚ´æ£¬È¡µÚÒ»¸öÔªËØÅÅĞò£¬ĞÎ³ÉÒ»¸ö´ı±È½Ï¼¯ºÏ
+ * ½«´ı±È½Ï¼¯ºÏÖĞµÄ×îĞ¡ÔªËØ·ÅÈëÊä³ö¿é£¬È¡ËùÔÚ¿éµÄÏÂÒ»¸öÔªËØ·ÅÈë´ı±È½Ï¼¯ºÏ£¬Êä³ö¿éÂúºóÊä³öµ½´ÅÅÌÖĞ
  * */
 
 
-//å—
+//¿é
 struct Block {
-    vector<int> tuples;//å…ƒç»„
-    int id;//å—ç¼–å·
+    vector<int> tuples;//Ôª×é
+    int id;//¿é±àºÅ
     bool operator<(const Block &b) const {
         return tuples[0] < b.tuples[0];
     }
 };
 
-//ç¼“å†²åŒº(å†…å­˜)
+//»º³åÇø(ÄÚ´æ)
 struct Buffer {
-    vector<Block> blocks;//è¾“å…¥å—
-    Block result;//ç»“æœå—ï¼Œå•ä¸ªå—ï¼Œç”¨äºä¸´æ—¶ä¿å­˜ç»“æœï¼Œå­˜æ»¡å°±å†™è¿›ç£ç›˜ç„¶åæ¸…ç©º
-//    vector<int> ptr;//è¯»æŒ‡é’ˆ
-//    int write_ptr;//å†™æŒ‡é’ˆ
+    vector<Block> blocks;//ÊäÈë¿é
+    Block result;//½á¹û¿é£¬µ¥¸ö¿é£¬ÓÃÓÚÁÙÊ±±£´æ½á¹û£¬´æÂú¾ÍĞ´½ø´ÅÅÌÈ»ºóÇå¿Õ
+//    vector<int> ptr;//¶ÁÖ¸Õë
+//    int write_ptr;//Ğ´Ö¸Õë
 //    Buffer() : read_ptr(0), write_ptr(0) {}
 };
 
-//ç£ç›˜
+//´ÅÅÌ
 class Disk {
-    vector<Block> blocks;//å­˜å‚¨è¾“å…¥æ•°æ®çš„å—
-//    int size;//ç£ç›˜å¤§å°
-    vector<Block> result;//ä¿å­˜æ’åºåçš„ç»“æœ
+    vector<Block> blocks;//´æ´¢ÊäÈëÊı¾İµÄ¿é
+//    int size;//´ÅÅÌ´óĞ¡
+    vector<Block> result;//±£´æÅÅĞòºóµÄ½á¹û
 
-    int size;//å·²è¯»å–è¿›å…¥ç¼“å†²åŒºå¤„ç†è¿‡çš„å¤§å°
+    int size = 0;//ÒÑ¶ÁÈ¡½øÈë»º³åÇø´¦Àí¹ıµÄ´óĞ¡
 public:
-    int WriteBlock(Block &b) {//å†™å—åˆ°ç£ç›˜
+    int WriteBlock(Block &b) {//Ğ´¿éµ½´ÅÅÌ
         if (blocks.size() + result.size() + 1 <= MAX_DISK_SIZE) {
             b.id = blocks.size();
             blocks.push_back(b);
@@ -51,7 +51,7 @@ public:
         return -1;
     }
 
-    int WriteResult(Block &b) {//å†™å—åˆ°ç£ç›˜
+    int WriteResult(Block &b) {//Ğ´¿éµ½´ÅÅÌ
         if (blocks.size() + result.size() + 1 <= MAX_DISK_SIZE) {
             b.id = result.size();
             result.push_back(b);
@@ -60,25 +60,34 @@ public:
         return -1;
     }
 
-    Block ReadBlock(int id) {//ä»ç£ç›˜è¯»å—
+    Block ReadBlock(int id) {//´Ó´ÅÅÌ¶Á¿é
         if (id >= 0 && id < blocks.size()) {
             return blocks[id];
         }
         return Block();
     }
 
-    void ReadResult(int id, Block &b) {//ä»ç£ç›˜è¯»å—
+    Block ReadResult(int id) {//´Ó´ÅÅÌ¶Á¿é
         if (id >= 0 && id < result.size()) {
-            b = result[id];
+            return result[id];
         }
+        return Block();
     }
 
     int getBlockSize() {
         return blocks.size();
     }
 
+    int getResultSize(){
+        return result.size();
+    }
+
     int getSize() {
         return size;
+    }
+
+    void addSize() {
+        size++;
     }
 
     void sortBlocks() {
@@ -101,7 +110,7 @@ public:
             WriteResult(b3);
             WriteResult(b4);
         }
-        if (numBlocks % 2 != 0) {//å¤„ç†å‰©ä½™çš„å¥‡æ•°ä¸ªå—
+        if (numBlocks % 2 != 0) {//´¦ÀíÊ£ÓàµÄÆæÊı¸ö¿é
             Block b = ReadBlock(numBlocks - 1);
             sort(b.tuples.begin(), b.tuples.end());
             WriteResult(b);
@@ -111,28 +120,31 @@ public:
     }
 };
 
+/* ¹é²¢ÅÅĞò´óÖÂÂß¼­£º
+ * Êı¾İ¼¯Ğ´Ó²ÅÌ -> Ó²ÅÌ·Ö×ÓÇøÅÅĞò -> ¸÷ÇøËÍ¿éÖÁ»º³åÇø -> »º³åÇø´¦ÀíµÃµ½½á¹ûËÍ»ØÓ²ÅÌ
+ * */
 
 void mergeSort(Disk &disk, Buffer &buf) {
-    // æŠŠå››ä¸ªå—å†™å…¥ç£ç›˜
+    // °ÑËÄ¸ö¿éĞ´Èë´ÅÅÌ
     Block block1, block2, block3, block4;
-    block1.tuples = {10, 9, 8, 7};
-    block2.tuples = {6, 5, 4, 3};
-    block3.tuples = {2, 1, 0, -1};
-    block4.tuples = {-2, -3, -4, -5};
+    block1.tuples = {8,9,6,4};
+    block2.tuples = {2,9,5,2};
+    block3.tuples = {1,1,2,6};
+    block4.tuples = {0,4,2,6};
     disk.WriteBlock(block1);
     disk.WriteBlock(block2);
     disk.WriteBlock(block3);
     disk.WriteBlock(block4);
-
-    // å¯¹æ¯ä¸¤ä¸ªå—è¿›è¡Œæ’åº
+    // ¶ÔÃ¿Á½¸ö¿é½øĞĞÅÅĞò
     disk.sortBlocks();
-
-    // å½’å¹¶æ’åº
-//    while (disk.getBlockSize() > 1) {
-//        int numPairs = disk.getBlockSize() / 2;
-    //åˆå§‹çš„ä¸¤å—
-
-    //æ³¨æ„ï¼šæ­¤å¤„ä¿ç•™ï¼éœ€è¦ç¼–å†™ä»£ç å°†æ•°æ®ä»ç£ç›˜è¯»å…¥ç¼“å†²åŒº
+    //Ã¿×éµÄÊıÁ¿
+    int numPairs = disk.getBlockSize() / GROUP_SIZE;
+    //³õÊ¼µÄÁ½¿é
+    for (int i = 0; i < GROUP_SIZE; ++i) {
+        Block block = disk.ReadBlock(i * numPairs);
+        buf.blocks.push_back(block);
+    }
+    map<int,int> flag,flag1;
 
     vector<int> s;
     for (int i = 0; i < buf.blocks.size(); ++i) {
@@ -141,99 +153,152 @@ void mergeSort(Disk &disk, Buffer &buf) {
         s.push_back(p);
     }
 
-    while (disk.getSize() >= disk.getBlockSize()) {
-        auto min = min_element(s.begin(),s.end());
+    while (disk.getSize() < disk.getBlockSize()) {
+        //È¡×îĞ¡Öµ
+        auto min = min_element(s.begin(), s.end());
         buf.result.tuples.push_back(*min);
         auto p = min - s.begin();
-        //æ³¨æ„ï¼Œæ­¤å¤„åº”åˆ¤æ–­tuplesæ˜¯å¦ä¸ºç©ºï¼Œä¸ºç©ºåˆ™è¯»å–ä¸‹ä¸€ä¸ªå—ï¼Œç„¶åsize++ï¼Œæ­¤å¤„æš‚æ—¶çœç•¥
+
+
+        //ÅĞ¶ÏtuplesÊÇ·ñÎª¿Õ£¬Îª¿ÕÔò¶ÁÈ¡ÏÂÒ»¸ö¿é£¬È»ºósize++
         s[p] = buf.blocks[p].tuples.front();
+
         buf.blocks[p].tuples.erase(buf.blocks[p].tuples.begin());
-    }
-
-    for (int i = 0; i < numPairs; i++) {
-        // ä»ç£ç›˜ä¸­è¯»å…¥ä¸¤ä¸ªå—
-
-
-        // åˆå§‹åŒ–å½’å¹¶ç»“æœå—
-        Block mergedBlock;
-        mergedBlock.tuples.reserve(b1.tuples.size() + b2.tuples.size());
-
-        // å½’å¹¶æ’åº
-        while (buf.blocks.size() > 0) {
-            // æ‰¾åˆ°å½“å‰æœ€å°å€¼çš„å—
-            int minBlock = -1;
-            for (int j = 0; j < buf.blocks.size(); j++) {
-                if (buf.ptr[j] < buf.blocks[j].tuples.size()) {
-                    if (minBlock == -1 ||
-                        buf.blocks[j].tuples[buf.ptr[j]] < buf.blocks[minBlock].tuples[buf.ptr[minBlock]]) {
-                        minBlock = j;
-                    }
-                }
-            }
-
-            // æ‰¾åˆ°äº†æœ€å°å€¼å—
-            if (minBlock != -1) {
-                // å°†æœ€å°å€¼åŠ å…¥å½’å¹¶ç»“æœå—
-                mergedBlock.tuples.push_back(buf.blocks[minBlock].tuples[buf.ptr[minBlock]]);
-                buf.ptr[minBlock]++;
-
-                // å½“ç¼“å†²åŒºæ»¡æ—¶ï¼Œå°†å½’å¹¶ç»“æœå—å†™å…¥ç£ç›˜
-                if (mergedBlock.tuples.size() == BUFFER_SIZE) {
-                    disk.WriteResult(mergedBlock);
-                    mergedBlock.tuples.clear();
-                }
-
-                // å¦‚æœå½“å‰å—å·²ç»å¤„ç†å®Œäº†ï¼Œä»ç¼“å†²åŒºä¸­åˆ é™¤
-                if (buf.ptr[minBlock] == buf.blocks[minBlock].tuples.size()) {
-                    buf.blocks.erase(buf.blocks.begin() + minBlock);
-                    buf.ptr.erase(buf.ptr.begin() + minBlock);
-                }
-            }
-        }
-
-        // ç¼“å†²åŒºä¸ºç©ºæ—¶ï¼Œå°†å‰©ä½™éƒ¨åˆ†çš„å½’å¹¶ç»“æœå—å†™å…¥ç£ç›˜
-        if (mergedBlock.tuples.size() > 0) {
+        if(flag[p] == 1){
+                s[p] = std::numeric_limits<int>::max();
+                flag[p] = 0;
+                disk.addSize();
+            if (disk.getSize() < disk.getBlockSize())
+                continue;
 
         }
+        else if (buf.blocks[p].tuples.empty()) {
+            //Èç¹ûÕâ×é¶¼¶ÁÍêÁË£¬Ğ´»Ø£¬±ê¼Ç
+            if (buf.blocks[p].id % numPairs == numPairs - 1){
+                flag[p] = 1;
+                buf.blocks[p].tuples.push_back(s[p]);
+//                s[p] = std::numeric_limits<int>::max();
+
+            }
+            else{ buf.blocks[p] = disk.ReadBlock(buf.blocks[p].id + 1);
+            disk.addSize();}
+        }
+
+        //¿éÂúĞ´½á¹û
+        if (buf.result.tuples.size() >= BLOCK_SIZE) {
+            disk.WriteResult(buf.result);
+            buf.result.tuples.clear();
+        }
     }
-//    }
+    // ×îºóÒ»¿é½á¹û¿ÉÄÜ²»Âú£¬µ¥¶ÀĞ´Èë´ÅÅÌ
+    if (buf.result.tuples.size() > 0) {
+        disk.WriteResult(buf.result);
+    }
 }
 
-
-int main() {
-    Disk disk;
-    //ä¸ºå—æ‰‹åŠ¨èµ‹å€¼ï¼Œå¹¶ä¿å­˜åˆ°ç¡¬ç›˜ä¸­
-//    vector<Block> blocks;
-    Block block = {{1, 9, 8, 9}, 0};
-    Block block2 = {{0, 6, 0, 4}, 1};
-    Block block3 = {{2, 9, 5, 2}, 2};
-    Block block4 = {{1, 1, 2, 6}, 3};
-//    blocks.push_back(block);
-    disk.WriteBlock(block);
+void mergeSort2(Disk &disk, Buffer &buf) {
+    // °ÑËÄ¸ö¿éĞ´Èë´ÅÅÌ
+    Block block1, block2, block3, block4;
+    block1.tuples = {8,9,6,4};
+    block2.tuples = {2,9,5,2};
+    block3.tuples = {1,1,2,6};
+    block4.tuples = {0,4,2,6};
+    disk.WriteBlock(block1);
     disk.WriteBlock(block2);
     disk.WriteBlock(block3);
     disk.WriteBlock(block4);
-    //å°†ç¡¬ç›˜æ•°æ®åˆ†å¾—çš„ä¸¤å—æ’åº
+    // ¶ÔÃ¿Á½¸ö¿é½øĞĞÅÅĞò
     disk.sortBlocks();
-    //å–ç¡¬ç›˜æ•°æ®ï¼Œé€ç¼“å†²åŒº
-    Buffer buf;
-    buf.blocks.push_back(disk.ReadBlock(0));
-    buf.blocks.push_back(disk.ReadBlock(disk.getBlockSize() / GROUP_SIZE));
-    //å–ç¼“å†²åŒºçš„ç¬¬ä¸€ä¸ª
-    vector<int> s;
-    for (int i = 0; i < buf.blocks.size(); i++) {
-        s.push_back(buf.blocks[i].tuples[buf.ptr[i]]);
-        buf.ptr[i]++;
+    //Ã¿×éµÄÊıÁ¿
+    int numPairs = disk.getBlockSize() / GROUP_SIZE;
+    //³õÊ¼µÄÁ½¿é
+    for (int i = 0; i < GROUP_SIZE; ++i) {
+        Block block = disk.ReadBlock(i * numPairs);
+        buf.blocks.push_back(block);
     }
-    Block b;
-    //å¾ªç¯å–æœ€å°å€¼æ”¾å…¥ç¼“å†²åŒºï¼Œç»“æœç¼“å†²å—æ»¡å­˜å…¥ç£ç›˜ï¼Œè¾“å…¥æŒ‡é’ˆåˆ°åº•åˆ™ä»ç¡¬ç›˜è¯»å–ä¸‹ä¸€å—ï¼Œç›´åˆ°æ‰€æœ‰æ’åºç»“æŸ
-    while (1) {
-        auto a = std::min_element(s.begin(), s.end());
-        b.tuples.push_back(*a);
-        auto pos = a - s.begin();
-        s[pos] = buf.blocks[pos].tuples[++buf.ptr[pos]];
-    }
+    map<int,int> flag,flag1;
 
-//    disk.WriteResult()
-//    s.insert()
+    vector<int> s;
+    for (int i = 0; i < buf.blocks.size(); ++i) {
+        auto p = buf.blocks[i].tuples.front();
+        buf.blocks[i].tuples.erase(buf.blocks[i].tuples.begin());
+        s.push_back(p);
+    }
+    int last = numeric_limits<int>::max();
+    while (disk.getSize() < disk.getBlockSize()) {
+        //È¡×îĞ¡Öµ
+        auto min = min_element(s.begin(), s.end());
+        if(std::find(buf.result.tuples.begin(), buf.result.tuples.end(),*min) == buf.result.tuples.end()){
+            if (last != *min){
+                last = *min;
+                buf.result.tuples.push_back(*min);
+            }
+        }
+
+        auto p = min - s.begin();
+
+
+        //ÅĞ¶ÏtuplesÊÇ·ñÎª¿Õ£¬Îª¿ÕÔò¶ÁÈ¡ÏÂÒ»¸ö¿é£¬È»ºósize++
+        s[p] = buf.blocks[p].tuples.front();
+
+        buf.blocks[p].tuples.erase(buf.blocks[p].tuples.begin());
+        if(flag[p] == 1){
+            s[p] = std::numeric_limits<int>::max();
+            flag[p] = 0;
+            disk.addSize();
+            if (disk.getSize() < disk.getBlockSize())
+                continue;
+
+        }
+        else if (buf.blocks[p].tuples.empty()) {
+            //Èç¹ûÕâ×é¶¼¶ÁÍêÁË£¬Ğ´»Ø£¬±ê¼Ç
+            if (buf.blocks[p].id % numPairs == numPairs - 1){
+                flag[p] = 1;
+                buf.blocks[p].tuples.push_back(s[p]);
+//                s[p] = std::numeric_limits<int>::max();
+
+            }
+            else{ buf.blocks[p] = disk.ReadBlock(buf.blocks[p].id + 1);
+                disk.addSize();}
+        }
+
+        //¿éÂúĞ´½á¹û
+        if (buf.result.tuples.size() >= BLOCK_SIZE) {
+            disk.WriteResult(buf.result);
+            buf.result.tuples.clear();
+        }
+    }
+    // ×îºóÒ»¿é½á¹û¿ÉÄÜ²»Âú£¬µ¥¶ÀĞ´Èë´ÅÅÌ
+    if (buf.result.tuples.size() > 0) {
+        disk.WriteResult(buf.result);
+    }
+}
+
+int main() {
+    Disk disk;
+    Buffer buf;
+    mergeSort(disk,buf);
+    cout<<"²»È¥ÖØ£º"<<endl;
+    //Êä³ö´ÅÅÌ½á¹ûĞÅÏ¢
+    int numResultBlocks = disk.getResultSize();
+    for (int i = 0; i < numResultBlocks; i++) {
+        Block b = disk.ReadResult(i);
+        vector<int> tuples = b.tuples;
+        for (int j = 0; j < tuples.size(); j++) {
+            cout << tuples[j] << " ";
+        }
+    }
+    cout<<endl<<"È¥ÖØ£º"<<endl;
+    Disk d;
+    Buffer b;
+    mergeSort2(d,b);
+    int n = d.getResultSize();
+    for (int i = 0; i < n; i++) {
+        Block bb = d.ReadResult(i);
+        vector<int> tuples = bb.tuples;
+        for (int j = 0; j < tuples.size(); j++) {
+            cout << tuples[j] << " ";
+        }
+    }
+    return 0;
 }
