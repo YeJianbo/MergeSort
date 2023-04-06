@@ -123,7 +123,6 @@ public:
 /* 归并排序大致逻辑：
  * 数据集写硬盘 -> 硬盘分子区排序 -> 各区送块至缓冲区 -> 缓冲区处理得到结果送回硬盘
  * */
-
 void mergeSort(Disk &disk, Buffer &buf) {
     // 把四个块写入磁盘
     Block block1, block2, block3, block4;
